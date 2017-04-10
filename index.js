@@ -1,6 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var request = require('request');
+var memory = require('memory-cache');
 var bbbot = require('./bbbot');
 var app = express();
 
@@ -20,11 +21,22 @@ app.get('/', function(req, res, next) {
 app.post('/webhook', function(req, res, next) {
     res.status(200).end();
     for (var evt of req.body.events) {
-        if (evt.type == 'message') {
-            console.log(evt.message);
-            if (evt.message.text == 'ハロー') {
-                bbbot.ask(evt.replyToken);
-            }
+        if (!evt.type == 'message') {
+            continue;
         }
+        var botMemory = memory.get(evt.source.userId);
+        if (!botMemory) {
+            botMemory = {
+                status: null
+            }
+            memory.put(evt.source.userId, botMemory);
+        }
+        console.log(evt.message);
+        if (evt.message.text == 'ハロー') {
+            bbbot.greet(evt.replyToken);
+            botMemory.status = 'begin';
+            memory.put(evt.source.userId, botMemory);
+        }
+        console.log(botMemory);
     }
 });
