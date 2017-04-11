@@ -32,10 +32,22 @@ app.post('/webhook', function(req, res, next) {
             memory.put(evt.source.userId, botMemory);
         }
         console.log(evt.message);
-        if (evt.message.text == 'ハロー') {
-            bbbot.greet(evt.replyToken);
-            botMemory.status = 'begin';
-            memory.put(evt.source.userId, botMemory);
+        switch(botMemory.status) {
+            case 'begin':
+                if (evt.message.text == 'はい') {
+                    bbbot.ask(evt.replyToken);
+                    botMemory.status = 'begin';
+                    memory.put(evt.source.userId, botMemory);
+                }
+                break;
+            default:
+                if (evt.message.text == 'ハロー') {
+                    bbbot.greet(evt.replyToken);
+                    botMemory.status = 'begin';
+                    memory.put(evt.source.userId, botMemory);
+                } else {
+                    bbbot.dumb(evt.replyToken);
+                }
         }
         console.log(botMemory);
     }
