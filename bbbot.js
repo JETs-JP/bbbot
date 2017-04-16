@@ -1,4 +1,4 @@
-const LINE_CHANNEL_ACCESS_TOKEN = '{yout token}';
+const LINE_CHANNEL_ACCESS_TOKEN = '{your token}';
 
 var request = require('request');
 
@@ -29,7 +29,7 @@ module.exports = class bbbot {
         });
     }
 
-    static greet(replyToken) {
+    static greet(replyToken, botMemory) {
         var headers = {
             'Content-type': 'application/json',
             'Authorization': 'Bearer ' + LINE_CHANNEL_ACCESS_TOKEN
@@ -39,11 +39,41 @@ module.exports = class bbbot {
             messages: [
                 {
                     type: 'text',
-                    text: 'こんにちはー'
+                    text: 'こんにちは！会議室を取るよ！'
                 },
                 {
-                    type: 'text',
-                    text: '会議室をお探しですか？'
+                    type: 'template',
+                    altText: 'スマートフォンでないと話せないんだよね…。',
+                    template: {
+                        type: 'buttons',
+                        text: 'いつ？',
+                        actions: [
+                            {
+                                type: 'postback',
+                                label: '今日',
+                                text: '今日',
+                                data: 'today'
+                            },
+                            {
+                                type: 'postback',
+                                label: '明日',
+                                text: '明日',
+                                data: 'tomorrow'
+                            },
+                            {
+                                type: 'postback',
+                                label: 'あさって',
+                                text: 'あさって',
+                                data: 'after_tomorrow'
+                            },
+                            {
+                                type: 'postback',
+                                label: 'それ以外',
+                                text: 'それ以外',
+                                data: 'none_of_them'
+                            }
+                        ]
+                    }
                 }
             ]
         };
@@ -57,7 +87,7 @@ module.exports = class bbbot {
         });
     }
 
-    static ask(replyToken) {
+    static confirm_date(replyToken, botMemory) {
         var headers = {
             'Content-type': 'application/json',
             'Authorization': 'Bearer ' + LINE_CHANNEL_ACCESS_TOKEN
@@ -67,7 +97,7 @@ module.exports = class bbbot {
             messages: [
                 {
                     type: 'text',
-                    text: 'それじゃあ、いつでお探しか教えてください！'
+                    text: botMemory.date + 'ですね！'
                 },
             ]
         };

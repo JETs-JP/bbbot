@@ -21,33 +21,27 @@ app.get('/', function(req, res, next) {
 app.post('/webhook', function(req, res, next) {
     res.status(200).end();
     for (var evt of req.body.events) {
-        if (!evt.type == 'message') {
-            continue;
-        }
         var botMemory = memory.get(evt.source.userId);
-        if (!botMemory) {
-            botMemory = {
-                status: null
+        if (evt.type == 'message') {
+            if (!botMemory) {
+                botMemory = {};
+                memory.put(evt.source.userId, botMemory);
             }
-            memory.put(evt.source.userId, botMemory);
-        }
-        console.log(evt.message);
-        switch(botMemory.status) {
-            case 'begin':
-                if (evt.message.text == 'はい') {
-                    bbbot.ask(evt.replyToken);
-                    botMemory.status = 'begin';
-                    memory.put(evt.source.userId, botMemory);
-                }
-                break;
-            default:
+            console.log(evt.message);
+            if (!botMemory.date) {
+                // 今は必ず日付を最初に質問する前提で、それに依存した実装になっている
                 if (evt.message.text == 'ハロー') {
                     bbbot.greet(evt.replyToken);
-                    botMemory.status = 'begin';
-                    memory.put(evt.source.userId, botMemory);
                 } else {
                     bbbot.dumb(evt.replyToken);
                 }
+            } else {
+                bbbot.confirm_date(evt.replyToken, botMemory);
+            }
+        }
+        if (evt.type == 'postback') {
+            botMemory.date = evt.postback.data;
+            memory.put(evt.source.userId, botMemory);
         }
         console.log(botMemory);
     }
