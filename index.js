@@ -22,25 +22,30 @@ app.post('/webhook', function(req, res, next) {
     res.status(200).end();
     for (var evt of req.body.events) {
         var botMemory = memory.get(evt.source.userId);
+        if (!botMemory) {
+            botMemory = {};
+            memory.put(evt.source.userId, botMemory);
+        }
         if (evt.type == 'message') {
-            if (!botMemory) {
-                botMemory = {};
-                memory.put(evt.source.userId, botMemory);
-            }
             console.log(evt.message);
             if (!botMemory.date) {
                 // 今は必ず日付を最初に質問する前提で、それに依存した実装になっている
                 if (evt.message.text == 'ハロー') {
-                    bbbot.greet(evt.replyToken);
+                    bbbot.date(evt.replyToken);
                 } else {
                     bbbot.dumb(evt.replyToken);
                 }
-            } else {
-                bbbot.confirm_date(evt.replyToken, botMemory);
+            } else if (!botMemory.time) {
+                // 会話の流れをチェックする
+                bbbot.time(evt.replyToken, botMemory);
             }
         }
         if (evt.type == 'postback') {
-            botMemory.date = evt.postback.data;
+            console.log('postback data: ' + evt.postback.data);
+            var data = JSON.parse(evt.postback.data);
+            for (var key in data) {
+                botMemory[key] = data[key];
+            }
             memory.put(evt.source.userId, botMemory);
         }
         console.log(botMemory);
