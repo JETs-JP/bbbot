@@ -6,6 +6,7 @@ var bbbot = require('./bbbot');
 var app = express();
 
 app.use(bodyParser.json());
+app.use(express.static('static'));
 
 var port = (process.env.PORT || 3000);
 var server = app.listen(port, function() {

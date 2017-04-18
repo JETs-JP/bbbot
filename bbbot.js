@@ -119,6 +119,7 @@ module.exports = class bbbot {
                         text: '何時？',
                         columns: [
                             {
+                                thumbnailImageUrl: 'https://e5f047ca.ngrok.io/images/morning.jpg',
                                 text: '朝',
                                 actions: [
                                     {
@@ -142,6 +143,7 @@ module.exports = class bbbot {
                                 ]
                             },
                             {
+                                thumbnailImageUrl: 'https://e5f047ca.ngrok.io/images/daytime.jpg',
                                 text: '昼',
                                 actions: [
                                     {
@@ -165,6 +167,7 @@ module.exports = class bbbot {
                                 ]
                             },
                             {
+                                thumbnailImageUrl: 'https://e5f047ca.ngrok.io/images/evening.jpg',
                                 text: '夜',
                                 actions: [
                                     {
@@ -257,8 +260,8 @@ module.exports = class bbbot {
                             },
                             {
                                 type: 'postback',
-                                label: '1時間',
-                                text: '1時間',
+                                label: '60分',
+                                text: '60分',
                                 data: "{ \"duration\": 60 }"
                             },
                             {
