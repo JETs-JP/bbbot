@@ -88,6 +88,14 @@ module.exports = class bbbot {
     }
 
     static time(replyToken, botMemory) {
+        var date;
+        if (botMemory.date == 'today') {
+            date = '今日';
+        } else if (botMemory.date == 'tomorrow') {
+            date = 'あした';
+        } else if (botMemory.date == 'after_tomorrow') {
+            date = 'あさって';
+        }
         var headers = {
             'Content-type': 'application/json',
             'Authorization': 'Bearer ' + LINE_CHANNEL_ACCESS_TOKEN
@@ -97,11 +105,11 @@ module.exports = class bbbot {
             messages: [
                 {
                     type: 'text',
-                    text: botMemory.date + 'ですね！'
+                    text: date + 'だね！'
                 },
                 {
                     type: 'text',
-                    text: botMemory.date + 'の何時がいいですか？'
+                    text: 'なんじから？'
                 },
                 {
                     type: 'template',
@@ -194,4 +202,232 @@ module.exports = class bbbot {
         });
     }
 
+    static turnout(replyToken, botMemory) {
+        var headers = {
+            'Content-type': 'application/json',
+            'Authorization': 'Bearer ' + LINE_CHANNEL_ACCESS_TOKEN
+        };
+        var body = {
+            replyToken: replyToken,
+            messages: [
+                {
+                    type: 'text',
+                    text: botMemory.time + '時だね！'
+                },
+                {
+                    type: 'text',
+                    text: 'なんにん？'
+                }
+            ]
+        };
+        var url = 'https://api.line.me/v2/bot/message/reply';
+        request({
+            url: url,
+            method: 'POST',
+            headers: headers,
+            body: body,
+            json: true
+        });
+    }
+
+    static duration(replyToken, botMemory) {
+        var headers = {
+            'Content-type': 'application/json',
+            'Authorization': 'Bearer ' + LINE_CHANNEL_ACCESS_TOKEN
+        };
+        var body = {
+            replyToken: replyToken,
+            messages: [
+                {
+                    type: 'text',
+                    text: botMemory.turnout + '人だね！'
+                },
+                {
+                    type: 'template',
+                    altText: 'スマートフォンでないと話せないんだよね…。',
+                    template: {
+                        type: 'buttons',
+                        text: 'なんぷん？',
+                        actions: [
+                            {
+                                type: 'postback',
+                                label: '30分',
+                                text: '30分',
+                                data: "{ \"duration\": 30 }"
+                            },
+                            {
+                                type: 'postback',
+                                label: '1時間',
+                                text: '1時間',
+                                data: "{ \"duration\": 60 }"
+                            },
+                            {
+                                type: 'postback',
+                                label: 'それ以外',
+                                text: 'それ以外',
+                                data: "{ \"duration\": \"none_of_them\" }"
+                            }
+                        ]
+                    }
+                }
+            ]
+        };
+        var url = 'https://api.line.me/v2/bot/message/reply';
+        request({
+            url: url,
+            method: 'POST',
+            headers: headers,
+            body: body,
+            json: true
+        });
+    }
+
+    static room(replyToken, botMemory) {
+        var headers = {
+            'Content-type': 'application/json',
+            'Authorization': 'Bearer ' + LINE_CHANNEL_ACCESS_TOKEN
+        };
+        var body = {
+            replyToken: replyToken,
+            messages: [
+                {
+                    type: 'text',
+                    text: botMemory.duration + '分だね！'
+                },
+                {
+                    type: 'template',
+                    altText: 'スマートフォンでないと話せないんだよね…。',
+                    template: {
+                        type: 'buttons',
+                        text: '開いている部屋はこれだよ。どれがいい？',
+                        actions: [
+                            {
+                                type: 'postback',
+                                label: '15M1',
+                                text: '15M1',
+                                data: "{ \"room\": \"15M1\" }"
+                            },
+                            {
+                                type: 'postback',
+                                label: '17M2',
+                                text: '17M2',
+                                data: "{ \"room\": \"17M2\" }"
+                            },
+                            {
+                                type: 'postback',
+                                label: '19M3',
+                                text: '19M3',
+                                data: "{ \"room\": \"19M3\" }"
+                            },
+                            {
+                                type: 'postback',
+                                label: '20M6',
+                                text: '20M6',
+                                data: "{ \"room\": \"20M6\" }"
+                            }
+                        ]
+                    }
+                }
+            ]
+        };
+        var url = 'https://api.line.me/v2/bot/message/reply';
+        request({
+            url: url,
+            method: 'POST',
+            headers: headers,
+            body: body,
+            json: true
+        });
+    }
+
+    static title(replyToken, botMemory) {
+        var headers = {
+            'Content-type': 'application/json',
+            'Authorization': 'Bearer ' + LINE_CHANNEL_ACCESS_TOKEN
+        };
+        var body = {
+            replyToken: replyToken,
+            messages: [
+                {
+                    type: 'text',
+                    text: 'OK! 予約しちゃうよ。'
+                },
+                {
+                    type: 'text',
+                    text: 'なんて名前で予約する？'
+                }
+            ]
+        };
+        var url = 'https://api.line.me/v2/bot/message/reply';
+        request({
+            url: url,
+            method: 'POST',
+            headers: headers,
+            body: body,
+            json: true
+        });
+    }
+
+    static result(replyToken, botMemory) {
+        var begin = botMemory.time + ':00';
+        var end;
+        if (botMemory.duration == 30) {
+            end = botMemory.time + ':30';
+        } else if (botMemory.duration == 60) {
+            end = botMemory.time + 1 + ':00';
+        }
+        var headers = {
+            'Content-type': 'application/json',
+            'Authorization': 'Bearer ' + LINE_CHANNEL_ACCESS_TOKEN
+        };
+        var body = {
+            replyToken: replyToken,
+            messages: [
+                {
+                    type: 'text',
+                    text: 'OK! 予約できたよ！'
+                },
+                {
+                    type: 'text',
+                    text: '名前: ' + botMemory.title + '\n' + '日時: 4/20 ' + begin + '～' + end + '\n' + '場所: ' + botMemory.room
+                }
+            ]
+        };
+        var url = 'https://api.line.me/v2/bot/message/reply';
+        request({
+            url: url,
+            method: 'POST',
+            headers: headers,
+            body: body,
+            json: true
+        });
+    }
+
+    static abandon(replyToken) {
+        var headers = {
+            'Content-type': 'application/json',
+            'Authorization': 'Bearer ' + LINE_CHANNEL_ACCESS_TOKEN
+        };
+        var body = {
+            replyToken: replyToken,
+            messages: [
+                {
+                    type: 'text',
+                    text: 'ちょっと僕にはむずかしいな・・・'
+                },
+                {
+                    type: 'text',
+                    text: '近くのアドミさんに相談してみてね！'
+                }
+            ]
+        };
+        var url = 'https://api.line.me/v2/bot/message/reply';
+        request({
+            url: url,
+            method: 'POST',
+            headers: headers,
+            body: body,
+            json: true
+        });
+    }
 }

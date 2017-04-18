@@ -24,13 +24,17 @@ app.post('/webhook', function(req, res, next) {
         var botMemory = memory.get(evt.source.userId);
         if (!botMemory) {
             botMemory = {};
-            memory.put(evt.source.userId, botMemory);
         }
         if (evt.type == 'message') {
             console.log(evt.message);
+            if (evt.message.text == 'それ以外') {
+                bbbot.abandon(evt.replyToken);
+                memory.put(evt.source.userId, {});
+                continue;
+            }
             if (!botMemory.date) {
                 // 今は必ず日付を最初に質問する前提で、それに依存した実装になっている
-                if (evt.message.text == 'ハロー') {
+                if (evt.message.text == 'こんにちは') {
                     bbbot.date(evt.replyToken);
                 } else {
                     bbbot.dumb(evt.replyToken);
@@ -38,6 +42,21 @@ app.post('/webhook', function(req, res, next) {
             } else if (!botMemory.time) {
                 // 会話の流れをチェックする
                 bbbot.time(evt.replyToken, botMemory);
+            } else if (!botMemory.turnout) {
+                bbbot.turnout(evt.replyToken, botMemory);
+                botMemory.turnout = 'waiting_reply';
+            } else if (botMemory.turnout == 'waiting_reply') {
+                botMemory.turnout = parseInt(evt.message.text, 10);
+                bbbot.duration(evt.replyToken, botMemory);
+            } else if (!botMemory.room) {
+                bbbot.room(evt.replyToken, botMemory);
+            } else if (!botMemory.title) {
+                bbbot.title(evt.replyToken, botMemory);
+                botMemory.title = 'waiting_reply';
+            } else if (botMemory.title == 'waiting_reply') {
+                botMemory.title = evt.message.text;
+                bbbot.result(evt.replyToken, botMemory);
+                botMemory = {};
             }
         }
         if (evt.type == 'postback') {
@@ -46,8 +65,8 @@ app.post('/webhook', function(req, res, next) {
             for (var key in data) {
                 botMemory[key] = data[key];
             }
-            memory.put(evt.source.userId, botMemory);
         }
+        memory.put(evt.source.userId, botMemory);
         console.log(botMemory);
     }
 });
