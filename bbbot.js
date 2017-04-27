@@ -2,8 +2,47 @@ const LINE_CHANNEL_ACCESS_TOKEN = '{your token}';
 
 var request = require('request');
 
-//--------
+/*
+ * button template message definition
+ */
+var ButtonsMessage = function(text) {
+    this.text = text;
+    this.actions = [];
+};
 
+ButtonsMessage.prototype.addAction = function(text, data) {
+    this.actions.push({
+        text,
+        data
+    });
+};
+
+ButtonsMessage.prototype.build = function() {
+    var message = {
+        type: 'template',
+        altText: 'スマホじゃないと話せないんだよね…。',
+        template: {
+            type: 'buttons',
+            text: this.text,
+            actions: []
+        }
+    };
+    // TODO: this.actionsがなければエラー
+    for (var a of this.actions) {
+        var action = {
+            type: 'postback',
+            label: a.text,
+            text: a.text,
+            data: a.data
+        }
+        message.template.actions.push(action);
+    }
+    return message;
+};
+
+/*
+ * main skeleton impl of LINE REPLY_MESSAGE API
+ */
 var Reply = function(replyToken) {
     this.replyToken = replyToken;
     this.messages = [];
@@ -30,6 +69,10 @@ Reply.prototype.addTextMessage = function(text) {
     this.addMessage(message);
 }
 
+Reply.prototype.addButtonsMessage = function(buttons) {
+    this.addMessage(buttons.build());
+}
+
 Reply.prototype.execute = function() {
     // TODO: エラーハンドリング
     request({
@@ -44,44 +87,19 @@ Reply.prototype.execute = function() {
     });
 };
 
+/*
+ * bbbot module's main body.
+ */
 module.exports = class bbbot {
     static date(replyToken) {
         var ask = new Reply(replyToken);
         ask.addTextMessage('こんにちは！会議室を取るよ！');
-        ask.addMessage({
-            type: 'template',
-            altText: 'スマートフォンでないと話せないんだよね…。',
-            template: {
-                type: 'buttons',
-                text: 'いつ？',
-                actions: [
-                    {
-                        type: 'postback',
-                        label: '今日',
-                        text: '今日',
-                        data: "{ \"date\": \"today\" }"
-                    },
-                    {
-                        type: 'postback',
-                        label: '明日',
-                        text: '明日',
-                        data: "{ \"date\": \"tomorrow\" }"
-                    },
-                    {
-                        type: 'postback',
-                        label: 'あさって',
-                        text: 'あさって',
-                        data: "{ \"date\": \"after_tomorrow\" }"
-                    },
-                    {
-                        type: 'postback',
-                        label: 'それ以外',
-                        text: 'それ以外',
-                        data: "{ \"date\": \"none_of_them\" }"
-                    }
-                ]
-            }
-        });
+        var buttons = new ButtonsMessage('いつ？');
+        buttons.addAction('今日', "{ \"date\": \"today\" }");
+        buttons.addAction('明日', "{ \"date\": \"tomorrow\" }");
+        buttons.addAction('あさって', "{ \"date\": \"after_tomorrow\" }");
+        buttons.addAction('それ以外', "{ \"date\": \"none_of_them\" }");
+        ask.addButtonsMessage(buttons);
         ask.execute();
     }
 
@@ -192,74 +210,23 @@ module.exports = class bbbot {
     static duration(replyToken, botMemory) {
         var ask = new Reply(replyToken);
         ask.addTextMessage(botMemory.turnout + '人だね！');
-        ask.addMessage({
-            type: 'template',
-            altText: 'スマートフォンでないと話せないんだよね…。',
-            template: {
-                type: 'buttons',
-                text: 'なんぷん？',
-                actions: [
-                    {
-                        type: 'postback',
-                        label: '30分',
-                        text: '30分',
-                        data: "{ \"duration\": 30 }"
-                    },
-                    {
-                        type: 'postback',
-                        label: '60分',
-                        text: '60分',
-                        data: "{ \"duration\": 60 }"
-                    },
-                    {
-                        type: 'postback',
-                        label: 'それ以外',
-                        text: 'それ以外',
-                        data: "{ \"duration\": \"none_of_them\" }"
-                    }
-                ]
-            }
-        });
+        var buttons = new ButtonsMessage('なんぷん？');
+        buttons.addAction('30分', "{ \"duration\": 30 }");
+        buttons.addAction('60分', "{ \"duration\": 60 }");
+        buttons.addAction('それ以外', "{ \"duration\": \"none_of_them\" }");
+        ask.addButtonsMessage(buttons);
         ask.execute();
     }
 
     static room(replyToken, botMemory) {
         var ask = new Reply(replyToken);
         ask.addTextMessage(botMemory.duration + '分だね！');
-        ask.addMessage({
-            type: 'template',
-            altText: 'スマートフォンでないと話せないんだよね…。',
-            template: {
-                type: 'buttons',
-                text: '開いている部屋はこれだよ。どれがいい？',
-                actions: [
-                    {
-                        type: 'postback',
-                        label: '15M1',
-                        text: '15M1',
-                        data: "{ \"room\": \"15M1\" }"
-                    },
-                    {
-                        type: 'postback',
-                        label: '17M2',
-                        text: '17M2',
-                        data: "{ \"room\": \"17M2\" }"
-                    },
-                    {
-                        type: 'postback',
-                        label: '19M3',
-                        text: '19M3',
-                        data: "{ \"room\": \"19M3\" }"
-                    },
-                    {
-                        type: 'postback',
-                        label: '20M6',
-                        text: '20M6',
-                        data: "{ \"room\": \"20M6\" }"
-                    }
-                ]
-            }
-        });
+        var buttons = new ButtonsMessage('開いている部屋はこれだよ。どれがいい？');
+        buttons.addAction('15M1', "{ \"room\": \"15M1\" }");
+        buttons.addAction('17M2', "{ \"room\": \"17M2\" }");
+        buttons.addAction('19M3', "{ \"room\": \"19M3\" }");
+        buttons.addAction('20M6', "{ \"room\": \"20M6\" }");
+        ask.addButtonsMessage(buttons);
         ask.execute();
     }
 
