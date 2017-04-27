@@ -35,11 +35,7 @@ app.post('/webhook', function(req, res, next) {
             }
             if (!botMemory.date) {
                 // 今は必ず日付を最初に質問する前提で、それに依存した実装になっている
-                if (evt.message.text == 'こんにちは') {
-                    bbbot.date(evt.replyToken);
-                } else {
-                    bbbot.dumb(evt.replyToken);
-                }
+                bbbot.date(evt.replyToken);
             } else if (!botMemory.time) {
                 // 会話の流れをチェックする
                 bbbot.time(evt.replyToken, botMemory);
