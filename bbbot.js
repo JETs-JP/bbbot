@@ -372,6 +372,16 @@ module.exports = class bbbot {
     }
 
     static result(replyToken, botMemory) {
+        var date;
+        if (botMemory.date == 'today') {
+            date = new Date();
+        } else if (botMemory.date == 'tomorrow') {
+            date = new Date((new Date().getTime()) + (60 * 60 * 24 * 1000));
+        } else if (botMemory.date == 'after_tomorrow') {
+            date = new Date((new Date().getTime()) + (60 * 60 * 24 * 1000 * 2));
+        }
+        var dateString = (date.getMonth() + 1) + '/' + date.getDate();
+
         var begin = botMemory.time + ':00';
         var end;
         if (botMemory.duration == 30) {
@@ -392,7 +402,7 @@ module.exports = class bbbot {
                 },
                 {
                     type: 'text',
-                    text: '名前: ' + botMemory.title + '\n' + '日時: 4/20 ' + begin + '～' + end + '\n' + '場所: ' + botMemory.room
+                    text: '名前: ' + botMemory.title + '\n' + '日時: ' + dateString + ' ' + begin + '～' + end + '\n' + '場所: ' + botMemory.room
                 }
             ]
         };
