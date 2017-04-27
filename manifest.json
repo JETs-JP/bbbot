@@ -1,0 +1,11 @@
+{
+    "runtime":{
+        "majorVersion":"6"
+    },
+    "command": "node index.js",
+    "release": {
+        "commit": "verion 0.0.1",
+        "version": "0.0.1"
+    },
+    "notes": "Beehive Booking Bot"
+}

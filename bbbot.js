@@ -119,7 +119,7 @@ module.exports = class bbbot {
                         text: '何時？',
                         columns: [
                             {
-                                thumbnailImageUrl: 'https://e5f047ca.ngrok.io/images/morning.jpg',
+                                thumbnailImageUrl: 'https://bbbot-a63225.apaas.us6.oraclecloud.com/images/morning.jpg',
                                 text: '朝',
                                 actions: [
                                     {
@@ -143,7 +143,7 @@ module.exports = class bbbot {
                                 ]
                             },
                             {
-                                thumbnailImageUrl: 'https://e5f047ca.ngrok.io/images/daytime.jpg',
+                                thumbnailImageUrl: 'https://bbbot-a63225.apaas.us6.oraclecloud.com/images/daytime.jpg',
                                 text: '昼',
                                 actions: [
                                     {
@@ -167,7 +167,7 @@ module.exports = class bbbot {
                                 ]
                             },
                             {
-                                thumbnailImageUrl: 'https://e5f047ca.ngrok.io/images/evening.jpg',
+                                thumbnailImageUrl: 'https://bbbot-a63225.apaas.us6.oraclecloud.com/images/evening.jpg',
                                 text: '夜',
                                 actions: [
                                     {
