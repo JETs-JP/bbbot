@@ -3,18 +3,41 @@ const LINE_CHANNEL_ACCESS_TOKEN = '{your token}';
 var request = require('request');
 
 /*
- * button template message definition
+ * buttons template message definition
  */
-var ButtonsMessage = function(text) {
+var Buttons = function(text) {
     this.text = text;
+    this.thumbnailImageUrl = null;
     this.actions = [];
 };
 
-ButtonsMessage.prototype.addAction = function(text, data) {
+Buttons.prototype.addThumbnailImageUrl = function(url) {
+    this.thumbnailImageUrl = url;
+};
+
+Buttons.prototype.addAction = function(text, data) {
     this.actions.push({
         text,
         data
     });
+};
+
+Buttons.prototype.build = function() {
+    var obj = [];
+    for (var a of this.actions) {
+        var action = {
+            type: 'postback',
+            label: a.text,
+            text: a.text,
+            data: a.data
+        }
+        obj.push(action);
+    }
+    return obj;
+};
+
+var ButtonsMessage = function(buttons) {
+    this.buttons = buttons;
 };
 
 ButtonsMessage.prototype.build = function() {
@@ -23,19 +46,43 @@ ButtonsMessage.prototype.build = function() {
         altText: 'スマホじゃないと話せないんだよね…。',
         template: {
             type: 'buttons',
+            thumbnailImageUrl: this.buttons.thumbnailImageUrl,
+            text: this.buttons.text,
+            actions: this.buttons.build()
+        }
+    };
+    return message;
+};
+
+/*
+ * carousel template message definition
+ */
+var CarouselMessage = function() {
+    this.columns = [];
+};
+
+CarouselMessage.prototype.addColumn = function(buttonsAsColumn) {
+    this.columns.push(buttonsAsColumn);
+};
+
+CarouselMessage.prototype.build = function() {
+    var message = {
+        type: 'template',
+        altText: 'スマホじゃないと話せないんだよね…。',
+        template: {
+            type: 'carousel',
             text: this.text,
-            actions: []
+            columns: []
         }
     };
     // TODO: this.actionsがなければエラー
-    for (var a of this.actions) {
-        var action = {
-            type: 'postback',
-            label: a.text,
-            text: a.text,
-            data: a.data
+    for (var c of this.columns) {
+        var colobj = {
+            thumbnailImageUrl: c.thumbnailImageUrl,
+            text: c.text,
+            actions: c.build()
         }
-        message.template.actions.push(action);
+        message.template.columns.push(colobj);
     }
     return message;
 };
@@ -48,18 +95,9 @@ var Reply = function(replyToken) {
     this.messages = [];
 };
 
-Reply.prototype.url = 'https://api.line.me/v2/bot/message/reply';
-
-Reply.prototype.method = 'POST';
-
-Reply.prototype.headers = {
-    'Content-type': 'application/json',
-    'Authorization': 'Bearer ' + LINE_CHANNEL_ACCESS_TOKEN
-};
-
 Reply.prototype.addMessage = function(message) {
     this.messages.push(message);
-}
+};
 
 Reply.prototype.addTextMessage = function(text) {
     var message = {
@@ -67,18 +105,26 @@ Reply.prototype.addTextMessage = function(text) {
         text: text
     };
     this.addMessage(message);
-}
+};
 
 Reply.prototype.addButtonsMessage = function(buttons) {
     this.addMessage(buttons.build());
-}
+};
+
+Reply.prototype.addCarouselMessage = function(carousel) {
+    console.log(carousel.build());
+    this.addMessage(carousel.build());
+};
 
 Reply.prototype.execute = function() {
     // TODO: エラーハンドリング
     request({
-        url: this.url,
-        method: this.method,
-        headers: this.headers,
+        url: 'https://api.line.me/v2/bot/message/reply',
+        method: 'POST',
+        headers: {
+            'Content-type': 'application/json',
+            'Authorization': 'Bearer ' + LINE_CHANNEL_ACCESS_TOKEN
+        },
         body: {
             replyToken: this.replyToken,
             messages: this.messages
@@ -94,12 +140,12 @@ module.exports = class bbbot {
     static date(replyToken) {
         var ask = new Reply(replyToken);
         ask.addTextMessage('こんにちは！会議室を取るよ！');
-        var buttons = new ButtonsMessage('いつ？');
+        var buttons = new Buttons('いつ？');
         buttons.addAction('今日', "{ \"date\": \"today\" }");
         buttons.addAction('明日', "{ \"date\": \"tomorrow\" }");
         buttons.addAction('あさって', "{ \"date\": \"after_tomorrow\" }");
         buttons.addAction('それ以外', "{ \"date\": \"none_of_them\" }");
-        ask.addButtonsMessage(buttons);
+        ask.addButtonsMessage(new ButtonsMessage(buttons));
         ask.execute();
     }
 
@@ -115,88 +161,31 @@ module.exports = class bbbot {
         var ask = new Reply(replyToken);
         ask.addTextMessage(date + 'だね！');
         ask.addTextMessage('なんじから？');
-        ask.addMessage({
-            type: 'template',
-            altText: 'スマートフォンでないと話せないんだよね…。',
-            template: {
-                type: 'carousel',
-                text: '何時？',
-                columns: [
-                    {
-                        thumbnailImageUrl: 'https://bbbot-a63225.apaas.us6.oraclecloud.com/images/morning.jpg',
-                        text: '朝',
-                        actions: [
-                            {
-                                type: 'postback',
-                                text: '9時',
-                                label: '9時',
-                                data: "{ \"time\": 9 }"
-                            },
-                            {
-                                type: 'postback',
-                                text: '10時',
-                                label: '10時',
-                                data: "{ \"time\": 10 }"
-                            },
-                            {
-                                type: 'postback',
-                                text: '11時',
-                                label: '11時',
-                                data: "{ \"time\": 11 }"
-                            }
-                        ]
-                    },
-                    {
-                        thumbnailImageUrl: 'https://bbbot-a63225.apaas.us6.oraclecloud.com/images/daytime.jpg',
-                        text: '昼',
-                        actions: [
-                            {
-                                type: 'postback',
-                                text: '13時',
-                                label: '13時',
-                                data: "{ \"time\": 13 }"
-                            },
-                            {
-                                type: 'postback',
-                                text: '14時',
-                                label: '14時',
-                                data: "{ \"time\": 14 }"
-                            },
-                            {
-                                type: 'postback',
-                                text: '15時',
-                                label: '15時',
-                                data: "{ \"time\": 15 }"
-                            }
-                        ]
-                    },
-                    {
-                        thumbnailImageUrl: 'https://bbbot-a63225.apaas.us6.oraclecloud.com/images/evening.jpg',
-                        text: '夜',
-                        actions: [
-                            {
-                                type: 'postback',
-                                text: '16時',
-                                label: '16時',
-                                data: "{ \"time\": 16 }"
-                            },
-                            {
-                                type: 'postback',
-                                text: '17時',
-                                label: '17時',
-                                data: "{ \"time\": 17 }"
-                            },
-                            {
-                                type: 'postback',
-                                text: 'それ以外',
-                                label: 'それ以外',
-                                data: "{ \"time\": \"none_of_them\" }"
-                            }
-                        ]
-                    }
-                ]
-            }
-        });
+
+        var carousel = new CarouselMessage();
+
+        var column_morning = new Buttons('朝');
+        column_morning.addThumbnailImageUrl('https://bbbot-a63225.apaas.us6.oraclecloud.com/images/morning.jpg');
+        column_morning.addAction('9時', "{ \"time\": 9 }");
+        column_morning.addAction('10時', "{ \"time\": 10 }");
+        column_morning.addAction('11時', "{ \"time\": 11 }");
+        carousel.addColumn(column_morning);
+
+        var column_daytime = new Buttons('昼');
+        column_daytime.addThumbnailImageUrl('https://bbbot-a63225.apaas.us6.oraclecloud.com/images/daytime.jpg');
+        column_daytime.addAction('13時', "{ \"time\": 13 }");
+        column_daytime.addAction('14時', "{ \"time\": 14 }");
+        column_daytime.addAction('15時', "{ \"time\": 15 }");
+        carousel.addColumn(column_daytime);
+
+        var column_evening = new Buttons('夜');
+        column_evening.addThumbnailImageUrl('https://bbbot-a63225.apaas.us6.oraclecloud.com/images/evening.jpg');
+        column_evening.addAction('16時', "{ \"time\": 17 }");
+        column_evening.addAction('17時', "{ \"time\": 17 }");
+        column_evening.addAction('それ以外', "{ \"time\": \"none_of_them\" }");
+        carousel.addColumn(column_evening);
+
+        ask.addCarouselMessage(carousel);
         ask.execute();
     }
 
@@ -210,23 +199,23 @@ module.exports = class bbbot {
     static duration(replyToken, botMemory) {
         var ask = new Reply(replyToken);
         ask.addTextMessage(botMemory.turnout + '人だね！');
-        var buttons = new ButtonsMessage('なんぷん？');
+        var buttons = new Buttons('なんぷん？');
         buttons.addAction('30分', "{ \"duration\": 30 }");
         buttons.addAction('60分', "{ \"duration\": 60 }");
         buttons.addAction('それ以外', "{ \"duration\": \"none_of_them\" }");
-        ask.addButtonsMessage(buttons);
+        ask.addButtonsMessage(new ButtonsMessage(buttons));
         ask.execute();
     }
 
     static room(replyToken, botMemory) {
         var ask = new Reply(replyToken);
         ask.addTextMessage(botMemory.duration + '分だね！');
-        var buttons = new ButtonsMessage('開いている部屋はこれだよ。どれがいい？');
+        var buttons = new Buttons('開いている部屋はこれだよ。どれがいい？');
         buttons.addAction('15M1', "{ \"room\": \"15M1\" }");
         buttons.addAction('17M2', "{ \"room\": \"17M2\" }");
         buttons.addAction('19M3', "{ \"room\": \"19M3\" }");
         buttons.addAction('20M6', "{ \"room\": \"20M6\" }");
-        ask.addButtonsMessage(buttons);
+        ask.addButtonsMessage(new ButtonsMessage(buttons));
         ask.execute();
     }
 
