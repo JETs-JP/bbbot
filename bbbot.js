@@ -22,6 +22,14 @@ Reply.prototype.addMessage = function(message) {
     this.messages.push(message);
 }
 
+Reply.prototype.addTextMessage = function(text) {
+    var message = {
+        type: 'text',
+        text: text
+    };
+    this.addMessage(message);
+}
+
 Reply.prototype.execute = function() {
     // TODO: エラーハンドリング
     request({
@@ -39,10 +47,7 @@ Reply.prototype.execute = function() {
 module.exports = class bbbot {
     static date(replyToken) {
         var ask = new Reply(replyToken);
-        ask.addMessage({
-            type: 'text',
-            text: 'こんにちは！会議室を取るよ！'
-        });
+        ask.addTextMessage('こんにちは！会議室を取るよ！');
         ask.addMessage({
             type: 'template',
             altText: 'スマートフォンでないと話せないんだよね…。',
@@ -90,14 +95,8 @@ module.exports = class bbbot {
             date = 'あさって';
         }
         var ask = new Reply(replyToken);
-        ask.addMessage({
-            type: 'text',
-            text: date + 'だね！'
-        });
-        ask.addMessage({
-            type: 'text',
-            text: 'なんじから？'
-        });
+        ask.addTextMessage(date + 'だね！');
+        ask.addTextMessage('なんじから？');
         ask.addMessage({
             type: 'template',
             altText: 'スマートフォンでないと話せないんだよね…。',
@@ -185,23 +184,14 @@ module.exports = class bbbot {
 
     static turnout(replyToken, botMemory) {
         var ask = new Reply(replyToken);
-        ask.addMessage({
-            type: 'text',
-            text: botMemory.time + '時だね！'
-        });
-        ask.addMessage({
-            type: 'text',
-            text: 'なんにん？'
-        });
+        ask.addTextMessage(botMemory.time + '時だね！');
+        ask.addTextMessage('なんにん？');
         ask.execute();
     }
 
     static duration(replyToken, botMemory) {
         var ask = new Reply(replyToken);
-        ask.addMessage({
-            type: 'text',
-            text: botMemory.turnout + '人だね！'
-        });
+        ask.addTextMessage(botMemory.turnout + '人だね！');
         ask.addMessage({
             type: 'template',
             altText: 'スマートフォンでないと話せないんだよね…。',
@@ -235,10 +225,7 @@ module.exports = class bbbot {
 
     static room(replyToken, botMemory) {
         var ask = new Reply(replyToken);
-        ask.addMessage({
-            type: 'text',
-            text: botMemory.duration + '分だね！'
-        });
+        ask.addTextMessage(botMemory.duration + '分だね！');
         ask.addMessage({
             type: 'template',
             altText: 'スマートフォンでないと話せないんだよね…。',
@@ -278,14 +265,8 @@ module.exports = class bbbot {
 
     static title(replyToken, botMemory) {
         var ask = new Reply(replyToken);
-        ask.addMessage({
-            type: 'text',
-            text: 'OK! 予約しちゃうよ。'
-        });
-        ask.addMessage({
-            type: 'text',
-            text: 'なんて名前で予約する？'
-        });
+        ask.addTextMessage('OK! 予約しちゃうよ。');
+        ask.addTextMessage('なんて名前で予約する？');
         ask.execute();
     }
 
@@ -308,27 +289,15 @@ module.exports = class bbbot {
             end = botMemory.time + 1 + ':00';
         }
         var ask = new Reply(replyToken);
-        ask.addMessage({
-            type: 'text',
-            text: 'OK! 予約できたよ！'
-        });
-        ask.addMessage({
-            type: 'text',
-            text: '名前: ' + botMemory.title + '\n' + '日時: ' + dateString + ' ' + begin + '～' + end + '\n' + '場所: ' + botMemory.room
-        });
+        ask.addTextMessage('OK! 予約できたよ！');
+        ask.addTextMessage('名前: ' + botMemory.title + '\n' + '日時: ' + dateString + ' ' + begin + '～' + end + '\n' + '場所: ' + botMemory.room);
         ask.execute();
     }
 
     static abandon(replyToken) {
         var ask = new Reply(replyToken);
-        ask.addMessage({
-            type: 'text',
-            text: 'ちょっと僕にはむずかしいな・・・'
-        });
-        ask.addMessage({
-            type: 'text',
-            text: '近くのアドミさんに相談してみてね！'
-        });
+        ask.addTextMessage('ちょっと僕にはむずかしいな・・・');
+        ask.addTextMessage('近くのアドミさんに相談してみてね！');
         ask.execute();
     }
 }
