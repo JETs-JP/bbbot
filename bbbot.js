@@ -1,4 +1,4 @@
-const LINE_CHANNEL_ACCESS_TOKEN = '{your token}';
+const LINE_CHANNEL_ACCESS_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN;
 
 var request = require('request');
 
